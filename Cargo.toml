@@ -1,0 +1,9 @@
+[package]
+name = "binary_data_encoding_algorithms"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "2.0.16"
+base64 = "0.22.1"
+text_io = { version = "0.1.13" }
