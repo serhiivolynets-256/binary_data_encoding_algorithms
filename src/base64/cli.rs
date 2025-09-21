@@ -21,7 +21,13 @@ pub fn encode_file(input_file: &str, output_file: &str) -> Result<(), Base64Erro
     let mut line_number = 1;
     let mut first_line = true;
     while reader.read_until(b'\n', &mut line)? != 0 {
-        line.pop(); // remove \n
+        if let Some(b'\n') = line.last() {
+            line.pop(); // remove \n
+        }
+
+        if line.len() > 76 {
+            return Err(Base64Error::IncorrectStringLength{line: line_number, len: line.len() as u64});
+        }
         
         let encoded_line = algorithms::encode(&line);
 
@@ -52,6 +58,10 @@ pub fn decode_file(input_file: &str, output_file: &str) -> Result<(), Base64Erro
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
+        
+        if line.len() > 76 {
+            return Err(Base64Error::IncorrectStringLength{line: i as u64, len: line.len() as u64});
+        }
 
         if line.starts_with('-') {
             continue;
@@ -60,6 +70,7 @@ pub fn decode_file(input_file: &str, output_file: &str) -> Result<(), Base64Erro
         if i != 0 {
             writer.write_all(b"\n")?;
         }
+
         match algorithms::decode(&line) {
             Ok(decoded_line) => writer.write_all(&*decoded_line)?,
             Err(mut error) => {

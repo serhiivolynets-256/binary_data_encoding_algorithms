@@ -2,7 +2,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Base64Error {
-    #[error("Invalid input character {line}, {pos}")]
+    #[error("Invalid input character on line: {line}, pos: {pos}")]
     InvalidInputCharacter { line: u64, pos: u64 },
 
     #[error("Incorrect string length {len} on line {line}")]
