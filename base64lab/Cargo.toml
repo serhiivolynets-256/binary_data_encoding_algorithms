@@ -1,0 +1,15 @@
+[package]
+name = "base64lab"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "base64lab-example"
+path = "src/bin/main.rs"
+
+[dependencies]
+thiserror = { workspace = true }
+text_io = { workspace = true }
+
+[dev-dependencies]
+base64 = { workspace = true }

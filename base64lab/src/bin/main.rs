@@ -1,8 +1,8 @@
-mod base64;
+use base64lab::cli::run;
 
 fn main() {
     // base64::decode_file("test.base64", None).unwrap()
     // base64::encode_file("test.base64.decoded", None).unwrap()
     // base64::decode_file("test.txt", None).unwrap()
-    base64::cli::run();
+    run();
 }

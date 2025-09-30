@@ -1,4 +1,4 @@
-use crate::base64::error::Base64Error;
+use crate::error::Base64Error;
 use std::collections::HashMap;
 
 pub const ALPHABET: &str = r"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+\";
@@ -114,7 +114,7 @@ pub fn decode(data: &str) -> Result<Vec<u8>, Base64Error> {
 mod tests {
     use base64::Engine;
     use base64::prelude::BASE64_STANDARD;
-    use crate::base64::algorithms::{encode, decode};
+    use crate::algorithms::{encode, decode};
 
     #[test]
     fn test_encode() {
