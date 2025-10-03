@@ -3,7 +3,8 @@ name = "binary_data_encoding_algorithms"
 version = "0.1.0"
 edition = "2024"
 members = [
-    "base64lab"
+    "base64lab",
+    "bit_stream"
 ]
 resolver = "2"
 
