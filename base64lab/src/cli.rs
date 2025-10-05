@@ -1,12 +1,10 @@
 use std::fmt::Display;
-use std::io::{stdin, stdout, Write, BufRead, BufReader, BufWriter};
-use crate::base64::{
+use std::io::{Write, BufRead, BufReader};
+use crate::{
     algorithms,
     error::Base64Error
 };
 use std::fs::{File, OpenOptions};
-use base64::Engine;
-use base64::prelude::BASE64_STANDARD;
 use text_io::read;
 
 pub const BASE64_EXTENSION: &str = "base64";
