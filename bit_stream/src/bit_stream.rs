@@ -1,12 +1,13 @@
 use std::fs::File;
 use std::io::{Read, Write, Seek, SeekFrom};
+use std::os::unix::fs::FileExt;
 
 #[derive(Debug)]
 pub struct BitStreamWriter {
-    file: File,
-    bit_len: usize,
-    current_byte: u8,
-    bit_count: usize,
+    pub file: File,
+    pub bytes_written: usize,
+    pub current_byte: u8,
+    pub bit_count: usize,
 }
 
 impl BitStreamWriter {
@@ -14,7 +15,7 @@ impl BitStreamWriter {
         let file = File::create(path)?;
         Ok(Self {
             file,
-            bit_len: 0,
+            bytes_written: 0,
             current_byte: 0u8,
             bit_count: 0,
         })
@@ -46,9 +47,35 @@ impl BitStreamWriter {
             buffer.push(self.current_byte);
         }
 
-        self.file.seek(SeekFrom::Start(self.bit_len as u64))?;
+        self.file.seek(SeekFrom::Start(self.bytes_written as u64))?;
+        
+        if self.bit_count % 8 == 0 {
+            self.bytes_written +=  buffer.len();
+        } else {
+            self.bytes_written += buffer.len() - 1
+        }
+        
         self.file.write_all(&buffer)?;
-        self.bit_len += to_take / 8;
+        
+        // self.bit_len += to_take / 8;
+        
+        Ok(())
+    }
+
+    pub fn write_byte_sequence_unchecked_at(&mut self, bytes: &[u8], start: u64) -> std::io::Result<()> {
+        self.file.seek(SeekFrom::Start(start))?;
+        self.file.write_all(&bytes)?;
+
+        Ok(())
+    }
+
+    pub fn skip_bytes(&mut self, amount: usize) {
+        self.bytes_written += amount;
+    }
+
+    pub fn finish(self) -> std::io::Result<()> {
+        
+
         Ok(())
     }
 }
@@ -95,6 +122,59 @@ impl BitStreamReader {
         self.read_pos += to_read;
 
         Ok(out)
+    }
+
+    pub fn read_all(path: &str) -> std::io::Result<Vec<u8>> {
+        let mut reader = Self::open(path)?;
+        let mut buf = Vec::new();
+        reader.file.read_to_end(&mut buf)?;
+        
+        Ok(buf)
+    }
+
+    pub fn bit_len(&self) -> usize {
+        self.bit_len
+    }
+
+    pub fn byte_len(&self) -> usize {
+        (self.bit_len + 7) / 8
+    }
+}
+
+pub struct BitReader<'a> {
+    bytes: &'a [u8],
+    current_byte: usize,
+    current_bit: u8,
+}
+
+impl<'a> BitReader<'a> {
+    pub fn new(bytes: &'a [u8]    ) -> Self {
+        Self { 
+            bytes,
+            current_byte: 0,
+            current_bit: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for BitReader<'a> {
+    type Item = bool;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_byte >= self.bytes.len() {
+            return None;
+        }
+
+        let byte = self.bytes[self.current_byte];
+        let bit = (byte >> self.current_bit) & 1;
+
+        self.current_bit += 1;
+        if self.current_bit == 8 {
+            self.current_bit = 0;
+            self.current_byte += 1;
+        }
+
+        Some(bit == 1)
     }
 }
 
