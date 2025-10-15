@@ -5,7 +5,7 @@ edition = "2024"
 members = [
     "base64lab",
     "bit_stream"
-]
+, "huffman_codes"]
 resolver = "2"
 
 [profile.test]
