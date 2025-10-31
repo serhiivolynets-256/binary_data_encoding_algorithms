@@ -1,6 +1,5 @@
 use std::{cmp::Reverse, collections::HashMap};
 
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum Direction {
     Left,
@@ -11,7 +10,7 @@ impl Direction {
     pub fn other(&self) -> Self {
         match self {
             Self::Left => Self::Right,
-            Self::Right => Self::Left
+            Self::Right => Self::Left,
         }
     }
 }
@@ -44,7 +43,7 @@ pub enum Node {
         l: Box<Node>,
         r: Box<Node>,
         weight: u32,
-    }
+    },
 }
 
 impl Node {
@@ -55,7 +54,7 @@ impl Node {
             match (nodes.pop(), nodes.pop()) {
                 (Some(right), Some(left)) => nodes.push(Node::from_children(left, right)),
                 (Some(root), None) => return Some(root),
-                _ => return None
+                _ => return None,
             }
         }
     }
@@ -65,32 +64,31 @@ impl Node {
         Self::Inner {
             l: Box::new(l),
             r: Box::new(r),
-            weight,}
+            weight,
+        }
     }
 
     pub fn value(&self) -> Option<u8> {
         match self {
             Self::Inner { .. } => None,
-            Self::Leaf { value, ..} => Some(*value),
+            Self::Leaf { value, .. } => Some(*value),
         }
     }
 
     pub fn weight(&self) -> u32 {
         match self {
             Self::Inner { weight, .. } => *weight,
-            Self::Leaf { weight, ..} => *weight,
+            Self::Leaf { weight, .. } => *weight,
         }
     }
 
     pub fn get_child(&self, dir: Direction) -> Option<&Self> {
         match self {
-            Self::Inner { l, r, ..} => {
-                match dir {
-                    Direction::Left => Some(l.as_ref()),
-                    Direction::Right => Some(r.as_ref()),
-                }
+            Self::Inner { l, r, .. } => match dir {
+                Direction::Left => Some(l.as_ref()),
+                Direction::Right => Some(r.as_ref()),
             },
-            Self::Leaf { .. } => None
+            Self::Leaf { .. } => None,
         }
     }
 
@@ -115,11 +113,11 @@ impl Node {
         }
 
         encoding_dictionary
-    } 
+    }
 }
 
 #[derive(Debug, Clone)]
-pub struct NodeIter<'a>{
+pub struct NodeIter<'a> {
     pub current_node: Option<&'a Node>,
     pub path: Vec<(&'a Node, Direction)>,
 }
@@ -146,7 +144,7 @@ impl<'a> Iterator for NodeIter<'a> {
                     self.path.push((current_node, Direction::Left));
                     self.current_node = Some(l.as_ref());
                 }
-                Node::Leaf{ .. } => {
+                Node::Leaf { .. } => {
                     loop {
                         if let Some((parent, last_direction)) = self.path.pop() {
                             if let Node::Inner { .. } = &parent {
@@ -157,8 +155,7 @@ impl<'a> Iterator for NodeIter<'a> {
                                 } else if last_direction == Direction::Left {
                                     // go on the right.
                                     self.path.push((parent, Direction::Right));
-                                    self.current_node = parent
-                                        .get_child(Direction::Right);
+                                    self.current_node = parent.get_child(Direction::Right);
                                     break;
                                 }
                             }

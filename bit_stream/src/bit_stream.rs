@@ -1,6 +1,6 @@
 use std::fs::File;
-use std::io::{Read, Write, Seek, SeekFrom};
-use std::os::unix::fs::FileExt;
+use std::io::{Read, Seek, SeekFrom, Write};
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct BitStreamWriter {
@@ -22,6 +22,8 @@ impl BitStreamWriter {
     }
 
     pub fn write_bit_sequence(&mut self, data: &[u8], bits_amount: usize) -> std::io::Result<()> {
+        trace!("Write {bits_amount} bits of [{data:?}]");
+
         let to_take = bits_amount.min(data.len() * 8);
 
         let mut buffer = Vec::new();
@@ -48,21 +50,26 @@ impl BitStreamWriter {
         }
 
         self.file.seek(SeekFrom::Start(self.bytes_written as u64))?;
-        
+
         if self.bit_count % 8 == 0 {
-            self.bytes_written +=  buffer.len();
+            self.bytes_written += buffer.len();
         } else {
             self.bytes_written += buffer.len() - 1
         }
-        
+
         self.file.write_all(&buffer)?;
-        
+
         // self.bit_len += to_take / 8;
-        
+
         Ok(())
     }
 
-    pub fn write_byte_sequence_unchecked_at(&mut self, bytes: &[u8], start: u64) -> std::io::Result<()> {
+    pub fn write_byte_sequence_unchecked_at(
+        &mut self,
+        bytes: &[u8],
+        start: u64,
+    ) -> std::io::Result<()> {
+        trace!("Write byte sequence unchecked: [{bytes:?}] at {start}");
         self.file.seek(SeekFrom::Start(start))?;
         self.file.write_all(&bytes)?;
 
@@ -74,9 +81,11 @@ impl BitStreamWriter {
     }
 
     pub fn finish(self) -> std::io::Result<()> {
-        
-
         Ok(())
+    }
+
+    pub fn excess(&self) -> u8 {
+        self.bit_count as u8 // value from 0 to 8
     }
 }
 
@@ -99,10 +108,13 @@ impl BitStreamReader {
     }
 
     pub fn read_bit_sequence(&mut self, bits_amount: usize) -> std::io::Result<Vec<u8>> {
-        let mut file_buffer = Vec::new();
+        let approx_byte_start = self.read_pos / 8;
+        let approx_byte_read = (bits_amount + 7) / 8;
+        let mut file_buffer = vec![0u8; approx_byte_read];
 
-        self.file.seek(SeekFrom::Start(0))?;
-        self.file.read_to_end(&mut file_buffer)?;
+        self.file.seek(SeekFrom::Start(approx_byte_start as u64))?;
+        let bytes_read = self.file.read(&mut file_buffer)?;
+
         let available = self.bit_len.saturating_sub(self.read_pos);
 
         let to_read = bits_amount.min(available);
@@ -112,7 +124,7 @@ impl BitStreamReader {
             let absolute_byte = absolute_bit / 8;
             let absolute_bit_in_byte = absolute_bit % 8;
 
-            let bit = (file_buffer[absolute_byte] >> absolute_bit_in_byte) & 1;
+            let bit = (file_buffer[absolute_byte - approx_byte_start] >> absolute_bit_in_byte) & 1;
 
             if bit != 0 {
                 out[i / 8] |= 1u8 << i % 8;
@@ -121,6 +133,7 @@ impl BitStreamReader {
 
         self.read_pos += to_read;
 
+        trace!("Read {bits_amount} bits. They are [{out:?}]");
         Ok(out)
     }
 
@@ -128,7 +141,7 @@ impl BitStreamReader {
         let mut reader = Self::open(path)?;
         let mut buf = Vec::new();
         reader.file.read_to_end(&mut buf)?;
-        
+
         Ok(buf)
     }
 
@@ -148,8 +161,8 @@ pub struct BitReader<'a> {
 }
 
 impl<'a> BitReader<'a> {
-    pub fn new(bytes: &'a [u8]    ) -> Self {
-        Self { 
+    pub fn new(bytes: &'a [u8]) -> Self {
+        Self {
             bytes,
             current_byte: 0,
             current_bit: 0,
@@ -178,7 +191,6 @@ impl<'a> Iterator for BitReader<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::{BitStreamReader, BitStreamWriter};
@@ -197,14 +209,8 @@ mod tests {
         writer.write_bit_sequence(&a2, 9).unwrap();
 
         let mut reader = BitStreamReader::open(TEST_FILE_NAME).unwrap();
-        assert_eq!(
-            reader.read_bit_sequence(11).unwrap(),
-            [0xE1, 0x05],
-        );
-        assert_eq!(
-            reader.read_bit_sequence(7).unwrap(),
-            [0x3B],
-        );
+        assert_eq!(reader.read_bit_sequence(11).unwrap(), [0xE1, 0x05],);
+        assert_eq!(reader.read_bit_sequence(7).unwrap(), [0x3B],);
 
         //////////////////////////////////////////////
         // empty write
@@ -217,10 +223,7 @@ mod tests {
         writer.write_bit_sequence(&a2, 0).unwrap();
 
         let mut reader = BitStreamReader::open(TEST_FILE_NAME).unwrap();
-        assert_eq!(
-            reader.read_bit_sequence(64).unwrap(),
-            []
-        );
+        assert_eq!(reader.read_bit_sequence(64).unwrap(), []);
 
         //////////////////////////////////////////////
         // Read bytes
@@ -233,13 +236,7 @@ mod tests {
         writer.write_bit_sequence(&a2, 16).unwrap();
 
         let mut reader = BitStreamReader::open(TEST_FILE_NAME).unwrap();
-        assert_eq!(
-            reader.read_bit_sequence(16).unwrap(),
-            [0xE1, 0xEE],
-        );
-        assert_eq!(
-            reader.read_bit_sequence(8).unwrap(),
-            [0x77],
-        );
+        assert_eq!(reader.read_bit_sequence(16).unwrap(), [0xE1, 0xEE],);
+        assert_eq!(reader.read_bit_sequence(8).unwrap(), [0x77],);
     }
 }

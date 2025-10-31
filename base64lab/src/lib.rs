@@ -1,5 +1,5 @@
 mod algorithms;
-pub mod error;
 pub mod cli;
+pub mod error;
 
-pub use cli::{encode_file, decode_file};
+pub use cli::{decode_file, encode_file};

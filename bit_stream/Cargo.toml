@@ -8,3 +8,4 @@ name = "bit-stream-example"
 path = "src/bin/main.rs"
 
 [dependencies]
+tracing = { workspace = true }
