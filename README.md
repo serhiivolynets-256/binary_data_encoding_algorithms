@@ -11,10 +11,11 @@ cargo run --bin base64-example --release
 cargo run --bin bit-stream-example--release
 ```
 
-- lab4
+- lab3:
 ```sh
 cargo run --bin lab3 --release
+```
 
-- lab4
+- lab4:
 ```sh
 cargo run --bin lzv --release
