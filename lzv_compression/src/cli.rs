@@ -161,15 +161,11 @@ mod tests {
             .with_target(true)
             .try_init();
 
-        // let file_name = "screen.png";
-        // let file_name = "test.txt";
-        // let file_name = "0-ART Book.pdf";
-        // let file_name = "grad-book.pdf";
-        let file_name = "veil.dmg";
+        let file_name = "test_files/table3.xlsx";
         let input = &*format!("../{file_name}");
         let enc_output = &*format!("../{file_name}.{DEFAULT_ENCODED_FILE_EXTENSION}");
         let dec_output = &*format!(
-            "../{file_name}.{DEFAULT_ENCODED_FILE_EXTENSION}.{DEFAULT_DECODED_FILE_EXTENSION}.pdf"
+            "../{file_name}.{DEFAULT_ENCODED_FILE_EXTENSION}.{DEFAULT_DECODED_FILE_EXTENSION}.xlsx"
         );
 
         info!("==============================");
