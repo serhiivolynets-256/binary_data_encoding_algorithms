@@ -24,9 +24,9 @@ pub enum Base64Error {
 impl Base64Error {
     pub fn set_line(&mut self, new_line: u64) {
         match self {
-            Base64Error::InvalidInputCharacter { line, .. } => {*line = new_line}
-            Base64Error::IncorrectStringLength { line, .. } => {*line = new_line}
-            Base64Error::IncorrectUseOfPadding { line, .. } => {*line = new_line}
+            Base64Error::InvalidInputCharacter { line, .. } => *line = new_line,
+            Base64Error::IncorrectStringLength { line, .. } => *line = new_line,
+            Base64Error::IncorrectUseOfPadding { line, .. } => *line = new_line,
             Base64Error::AvailableDataAfterTheEndOfTheMessage => {}
             Base64Error::IOError(_) => {}
             Base64Error::UnknownOption => {}

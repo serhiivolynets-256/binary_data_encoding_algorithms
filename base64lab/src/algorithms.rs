@@ -12,7 +12,7 @@ pub fn encode(data: &[u8]) -> String {
 
     for i in (0..data.len()).step_by(3) {
         let mut triplet = 0u64;
-        
+
         triplet += (*data.get(i).unwrap_or(&0) as u64) << 16;
         triplet += (*data.get(i + 1).unwrap_or(&0) as u64) << 8;
         triplet += *data.get(i + 2).unwrap_or(&0) as u64;
@@ -43,7 +43,10 @@ pub fn encode(data: &[u8]) -> String {
 
 pub fn decode(data: &str) -> Result<Vec<u8>, Base64Error> {
     if data.len() % 4 != 0 {
-        return Err(Base64Error::IncorrectStringLength { line: 0, len: data.len() as u64 });
+        return Err(Base64Error::IncorrectStringLength {
+            line: 0,
+            len: data.len() as u64,
+        });
     }
 
     if data.len() == 0 {
@@ -57,18 +60,28 @@ pub fn decode(data: &str) -> Result<Vec<u8>, Base64Error> {
     for (i, c) in ALPHABET.chars().enumerate() {
         table.insert(c, i as u64);
     }
-    
+
     // decode without last quartet
     for i in (0..data.len() - 4).step_by(4) {
         let mut triplet = 0u64;
 
         for j in 0..4 {
             match data.as_bytes()[i + j] as char {
-                '=' => return Err(Base64Error::IncorrectUseOfPadding { line: 0, pos: (i + j) as u64 }),
+                '=' => {
+                    return Err(Base64Error::IncorrectUseOfPadding {
+                        line: 0,
+                        pos: (i + j) as u64,
+                    });
+                }
                 c if ALPHABET.contains(c) => {
                     triplet += table[&c] << (3 - j) * 6;
                 }
-                _ => return Err(Base64Error::InvalidInputCharacter { line: 0, pos: (i + j) as u64 }),
+                _ => {
+                    return Err(Base64Error::InvalidInputCharacter {
+                        line: 0,
+                        pos: (i + j) as u64,
+                    });
+                }
             }
         }
 
@@ -80,22 +93,33 @@ pub fn decode(data: &str) -> Result<Vec<u8>, Base64Error> {
     // decode last quartet
     let mut triplet = 0u64;
     let mut eq_count = 0;
-    for i in (data.len() - 4..data.len()) {
+    for i in data.len() - 4..data.len() {
         match data.as_bytes()[i] as char {
             '=' => {
                 if i % 4 < 2 {
-                    return Err(Base64Error::IncorrectUseOfPadding { line: 0, pos: i as u64 });
+                    return Err(Base64Error::IncorrectUseOfPadding {
+                        line: 0,
+                        pos: i as u64,
+                    });
                 } else {
                     eq_count += 1;
                 }
-            },
+            }
             c if ALPHABET.contains(c) => {
                 if eq_count != 0 {
-                    return Err(Base64Error::IncorrectUseOfPadding { line: 0, pos: i as u64 });
+                    return Err(Base64Error::IncorrectUseOfPadding {
+                        line: 0,
+                        pos: i as u64,
+                    });
                 }
                 triplet += table[&c] << (3 - i % 4) * 6;
             }
-            _ => return Err(Base64Error::InvalidInputCharacter { line: 0, pos: i as u64 }),
+            _ => {
+                return Err(Base64Error::InvalidInputCharacter {
+                    line: 0,
+                    pos: i as u64,
+                });
+            }
         }
     }
 
@@ -112,19 +136,16 @@ pub fn decode(data: &str) -> Result<Vec<u8>, Base64Error> {
 
 #[cfg(test)]
 mod tests {
+    use crate::algorithms::{decode, encode};
     use base64::Engine;
     use base64::prelude::BASE64_STANDARD;
-    use crate::algorithms::{encode, decode};
 
     #[test]
     fn test_encode() {
         let data = "hello world".as_bytes();
 
         for i in 0..data.len() {
-            assert_eq!(
-                &data[0..i],
-                decode(&encode(&data[0..i])).unwrap()
-            );
+            assert_eq!(&data[0..i], decode(&encode(&data[0..i])).unwrap());
             assert_eq!(encode(&data[0..i]), BASE64_STANDARD.encode(&data[0..i]));
 
             let e = encode(&data[0..i]);
