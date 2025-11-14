@@ -9,3 +9,4 @@ path = "src/bin/main.rs"
 
 [dependencies]
 bit_stream = { path = "../bit_stream" }
+tracing = { workspace = true }

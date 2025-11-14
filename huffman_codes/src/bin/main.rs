@@ -1,5 +1,6 @@
 use huffman_codes::algorithms::{decode, encode};
 use std::time::Instant;
+use tracing::info;
 
 fn run() {
     // let input_path = "sample3.xls";
