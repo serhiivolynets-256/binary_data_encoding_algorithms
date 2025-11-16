@@ -6,7 +6,6 @@ struct Alphabet {
     symbol_at_index: [u8; ALPHABET_SIZE],    // usize -> u8
 }
 
-
 impl Default for Alphabet {
     fn default() -> Self {
         let index_of_symbol: [usize; ALPHABET_SIZE] = std::array::from_fn(|i| i);

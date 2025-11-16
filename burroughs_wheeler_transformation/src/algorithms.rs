@@ -1,6 +1,7 @@
 use rdxsort;
 use rdxsort::{RdxSort, RdxSortTemplate};
 use std::fmt::{Display, Formatter};
+use tracing::debug;
 
 pub struct TableLine<const N: usize> {
     line: [u8; N],
@@ -53,11 +54,13 @@ impl<const N: usize> Display for Table<N> {
 
 pub struct BurroughsWheelerEncode {}
 
-impl BurroughsWheelerEncode {
-    pub fn new() -> Self {
+impl Default for BurroughsWheelerEncode {
+    fn default() -> Self {
         Self {}
     }
+}
 
+impl BurroughsWheelerEncode {
     pub fn encode_block<const N: usize>(block: &[u8; N]) -> Option<([u8; N], usize)>
     where
         [u8; N]: RdxSortTemplate,
@@ -120,7 +123,7 @@ impl BurroughsWheelerEncode {
         permutation_table
     }
 
-    fn encode<const N: usize>(bytes: &[u8; N]) -> ([u8; N], usize)
+    pub fn encode<const N: usize>(bytes: &[u8; N]) -> ([u8; N], usize)
     where
         [u8; N]: RdxSortTemplate,
         [[u8; N]]: RdxSort,
@@ -134,7 +137,7 @@ impl BurroughsWheelerEncode {
         (encoded_word, pos)
     }
 
-    fn decode<const N: usize>(encoded_word: &[u8; N], pos: usize) -> [u8; N] {
+    pub fn decode<const N: usize>(encoded_word: &[u8; N], pos: usize) -> [u8; N] {
         let permutation_table = BurroughsWheelerEncode::get_permutation_table(&encoded_word);
         let word = BurroughsWheelerEncode::decode_word(&encoded_word, permutation_table, pos);
 
