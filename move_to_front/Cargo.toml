@@ -1,11 +1,9 @@
 [package]
-name = "bit_stream"
+name = "move_to_front"
 version = "0.1.0"
 edition = "2024"
 
-[[bin]]
-name = "bit-stream-example"
-path = "src/bin/main.rs"
-
 [dependencies]
+utils = { workspace = true }
 tracing = { workspace = true }
+rand = { workspace = true }

@@ -1,0 +1,19 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "lab5"
+path = "src/bin/main.rs"
+
+[dependencies]
+text_io = { workspace = true }
+move_to_front = { workspace = true }
+huffman_codes = { workspace = true }
+lzv_compression = { workspace = true }
+burroughs_wheeler_transformation = { workspace = true }
+utils = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
+tracing = { workspace = true }

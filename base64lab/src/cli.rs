@@ -1,10 +1,7 @@
+use crate::{algorithms, error::Base64Error};
 use std::fmt::Display;
-use std::io::{Write, BufRead, BufReader};
-use crate::{
-    algorithms,
-    error::Base64Error
-};
 use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, Write};
 use text_io::read;
 
 pub const BASE64_EXTENSION: &str = "base64";
@@ -24,9 +21,12 @@ pub fn encode_file(input_file: &str, output_file: &str) -> Result<(), Base64Erro
         }
 
         if line.len() > 76 {
-            return Err(Base64Error::IncorrectStringLength{line: line_number, len: line.len() as u64});
+            return Err(Base64Error::IncorrectStringLength {
+                line: line_number,
+                len: line.len() as u64,
+            });
         }
-        
+
         let encoded_line = algorithms::encode(&line);
 
         if first_line {
@@ -56,9 +56,12 @@ pub fn decode_file(input_file: &str, output_file: &str) -> Result<(), Base64Erro
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        
+
         if line.len() > 76 {
-            return Err(Base64Error::IncorrectStringLength{line: i as u64, len: line.len() as u64});
+            return Err(Base64Error::IncorrectStringLength {
+                line: i as u64,
+                len: line.len() as u64,
+            });
         }
 
         if line.starts_with('-') {
@@ -73,7 +76,7 @@ pub fn decode_file(input_file: &str, output_file: &str) -> Result<(), Base64Erro
             Ok(decoded_line) => writer.write_all(&*decoded_line)?,
             Err(mut error) => {
                 error.set_line(i as u64);
-                return Err(error)
+                return Err(error);
             }
         }
     }
@@ -103,12 +106,12 @@ impl TryFrom<&str> for Options {
         match s {
             "encode" => Ok(Self::Encode),
             "decode" => Ok(Self::Decode),
-            _ => Err(Base64Error::UnknownOption)
+            _ => Err(Base64Error::UnknownOption),
         }
     }
 }
 
-pub fn run_encode_branch () {
+pub fn run_encode_branch() {
     let mut input_file = String::new();
     while input_file.is_empty() {
         print!("Name a file you want to encode: ");
@@ -118,7 +121,9 @@ pub fn run_encode_branch () {
             print!("You must provide a name. ");
         }
     }
-    print!("Name a file, where to store the result. You may leave it blank, to store data in {input_file}.{BASE64_EXTENSION}: ");
+    print!(
+        "Name a file, where to store the result. You may leave it blank, to store data in {input_file}.{BASE64_EXTENSION}: "
+    );
     let output_file: String = read!("{}\n");
 
     let output_file = match output_file.is_empty() {
@@ -131,7 +136,7 @@ pub fn run_encode_branch () {
     }
 }
 
-pub fn run_decode_branch () {
+pub fn run_decode_branch() {
     let mut input_file = String::new();
     while input_file.is_empty() {
         print!("Name a file you want to decode: ");
@@ -141,7 +146,9 @@ pub fn run_decode_branch () {
             print!("You must provide a name. ");
         }
     }
-    print!("Name a file, where you want to store the result. You may leave it blank, to store data in {input_file}.{DEBASE64_EXTENSION}: ");
+    print!(
+        "Name a file, where you want to store the result. You may leave it blank, to store data in {input_file}.{DEBASE64_EXTENSION}: "
+    );
     let output_file: String = read!("{}\n");
 
     let output_file = match output_file.is_empty() {

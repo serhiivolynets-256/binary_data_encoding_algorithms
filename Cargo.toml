@@ -4,7 +4,13 @@ version = "0.1.0"
 edition = "2024"
 members = [
     "base64lab",
-    "bit_stream"
+    "bit_stream",
+    "burroughs_wheeler_transformation",
+    "cli",
+    "huffman_codes",
+    "lzv_compression",
+    "move_to_front",
+    "utils"
 ]
 resolver = "2"
 
@@ -13,9 +19,22 @@ resolver = "2"
     overflow-checks = true
 
 [workspace.dependencies]
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 thiserror = "2.0.16"
 base64 = "0.22.1"
 text_io = { version = "0.1.13" }
+chrono = { version = "0.4.42" }
+tracing = {  version = "0.1.41" }
+rdxsort = { version = "0.3.0" }
+rand = { version = "0.8" }
+
+utils = { path = "utils" }
+huffman_codes = { path = "huffman_codes" }
+lzv_compression = { path = "lzv_compression" }
+burroughs_wheeler_transformation = { path = "burroughs_wheeler_transformation" }
+move_to_front = { path = "move_to_front" }
+
+
 
 
 
