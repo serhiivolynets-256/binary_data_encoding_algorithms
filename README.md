@@ -19,3 +19,9 @@ cargo run --bin lab3 --release
 - lab4:
 ```sh
 cargo run --bin lzv --release
+```
+
+- lab5:
+```shell
+cargo run --release --bin lab5
+```
